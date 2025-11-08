@@ -37,6 +37,8 @@ spec:
         runAsGroup: 1000
         runAsNonRoot: true
         runAsUser: 1000
+      imagePullSecrets:
+        - name: ghcr-cred
       initContainers:
       - command:
         - /bin/sh
@@ -77,7 +79,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: loadgenerator
+        image: ghcr.io/alaxay8/loadgenerator:latest
         imagePullPolicy: Always
         env:
         - name: FRONTEND_ADDR
