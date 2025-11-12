@@ -53,13 +53,11 @@ spec:
             - name: ZOOKEEPER_SERVERS
               value: "zookeeper:2888:3888"
           livenessProbe:
-            tcpSocket:
-              port: 2181
+            tcpSocket: { port: 2181 }
             initialDelaySeconds: 10
             periodSeconds: 10
           readinessProbe:
-            tcpSocket:
-              port: 2181
+            tcpSocket: { port: 2181 }
             initialDelaySeconds: 5
             periodSeconds: 10
 ---
@@ -124,13 +122,11 @@ spec:
             - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
               value: "true"
           livenessProbe:
-            tcpSocket:
-              port: 9092
+            tcpSocket: { port: 9092 }
             initialDelaySeconds: 20
             periodSeconds: 20
           readinessProbe:
-            tcpSocket:
-              port: 9092
+            tcpSocket: { port: 9092 }
             initialDelaySeconds: 10
             periodSeconds: 10
 ---
@@ -175,21 +171,15 @@ spec:
           env:
             - name: KAFKA_REST_BOOTSTRAP_SERVERS
               value: "kafka.shop.svc.cluster.local:9092"
-            - name: KAFKA_ADVERTISED_LISTENERS
-              value: "PLAINTEXT://kafka.shop.svc.cluster.local:9092"
             - name: KAFKA_REST_LISTENERS
               value: "http://0.0.0.0:8082"
             - name: KAFKA_REST_HOST_NAME
               value: "kafka-rest"
           readinessProbe:
-            httpGet:
-              path: /topics
-              port: 8082
+            httpGet: { path: /topics, port: 8082 }
             initialDelaySeconds: 15
             periodSeconds: 10
           livenessProbe:
-            httpGet:
-              path: /topics
-              port: 8082
+            httpGet: { path: /topics, port: 8082 }
             initialDelaySeconds: 25
             periodSeconds: 20
