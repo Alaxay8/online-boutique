@@ -44,7 +44,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: ghcr.io/alaxay8/checkoutservice:latest
+          image: ghcr.io/alaxay8/checkoutservice:v2
           imagePullPolicy: Always
           ports:
           - containerPort: 5050
@@ -69,6 +69,10 @@ spec:
             value: "currencyservice:7000"
           - name: CART_SERVICE_ADDR
             value: "cartservice:7070"
+          - name: KAFKA_REST_URL
+            value: "http://kafka-rest:8082"
+          - name: KAFKA_ORDERS_TOPIC
+            value: "orders"
           resources:
             requests:
               cpu: 100m
