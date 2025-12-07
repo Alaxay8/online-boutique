@@ -44,7 +44,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: ghcr.io/alaxay8/checkoutservice:v2
+          image: ghcr.io/alaxay8/checkoutservice:v3
           imagePullPolicy: Always
           ports:
           - containerPort: 5050
