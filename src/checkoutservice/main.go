@@ -15,7 +15,7 @@
 package main
 
 import (
-  "bytes"
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -119,6 +119,10 @@ func main() {
 	mustMapEnv(&svc.currencySvcAddr, "CURRENCY_SERVICE_ADDR")
 	mustMapEnv(&svc.emailSvcAddr, "EMAIL_SERVICE_ADDR")
 	mustMapEnv(&svc.paymentSvcAddr, "PAYMENT_SERVICE_ADDR")
+
+	svc.ordersTopic = getEnvWithDefault("KAFKA_ORDERS_TOPIC", "")
+	svc.kafkaRestURL = getEnvWithDefault("KAFKA_REST_URL", "")
+	svc.httpClient = &http.Client{Timeout: 3 * time.Second}
 
 	mustConnGRPC(ctx, &svc.shippingSvcConn, svc.shippingSvcAddr)
 	mustConnGRPC(ctx, &svc.productCatalogSvcConn, svc.productCatalogSvcAddr)
@@ -283,7 +287,7 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 		ShippingAddress:    req.Address,
 		Items:              prep.orderItems,
 	}
-cs.publishOrderPlaced(ctx, orderResult, req.UserId, &total)
+	cs.publishOrderPlaced(ctx, orderResult, req.UserId, &total)
 
 	if err := cs.sendOrderConfirmation(ctx, req.Email, orderResult); err != nil {
 		log.Warnf("failed to send order confirmation to %q: %+v", req.Email, err)
@@ -372,7 +376,7 @@ func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartI
 }
 
 func (cs *checkoutService) convertCurrency(ctx context.Context, from *pb.Money, toCurrency string) (*pb.Money, error) {
-	result, err := pb.NewCurrencyServiceClient(cs.currencySvcConn).Convert(context.TODO(), &pb.CurrencyConversionRequest{
+	result, err := pb.NewCurrencyServiceClient(cs.currencySvcConn).Convert(ctx, &pb.CurrencyConversionRequest{
 		From:   from,
 		ToCode: toCurrency})
 	if err != nil {
