@@ -2,7 +2,7 @@
   width: 100%;
   height: 85vh;
   margin-top: 50px;
-  background-color: #EEE;
+  background-color: var(--surface-soft);
   border-radius: 16px;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   overflow: auto;
@@ -31,7 +31,8 @@
   padding: 16px;
   margin-right: 20%;
   border-radius: 16px;
-  background-color: white;
+  background-color: var(--surface-bg);
+  color: var(--text-primary);
   min-height: 55px;
 }
 
@@ -58,7 +59,7 @@
   margin-right: 32px;
   padding: 16px;
   border-radius: 16px;
-  background-color: white;
+  background-color: var(--surface-bg);
 }
 
 .bot-input-file-button {
@@ -67,15 +68,16 @@
 
 .bot-input-text {
   border: none;
-  border-bottom: 1px solid #9AA0A6;
+  border-bottom: 1px solid var(--field-border);
   padding: 0 0 8px 16px;
   outline: none;
-  color: #1E2021;
+  color: var(--text-primary);
+  background-color: var(--surface-bg);
   width: -webkit-fill-available;
 }
 
 .user-message-text {
-  color: white;
+  color: var(--text-inverse);
 }
 
 .user-image-div {
@@ -101,7 +103,7 @@
   border-radius: 22px;
   cursor: pointer;
   background-color: var(--blue);
-  color: white;
+  color: var(--text-inverse);
 }
 
 .bot-input-button:disabled,
@@ -122,8 +124,8 @@ button[disabled]{
   display: flex;
   align-items: center;
   border-radius: 16px;
-  background-color: white;
-  color: black;
+  background-color: var(--surface-bg);
+  color: var(--text-primary);
 }
 
 .bot-product-img {
@@ -151,7 +153,7 @@ button[disabled]{
 }
 
 .shimmer {
-  color: grey;
+  color: var(--text-secondary);
   display:inline-block;
   -webkit-mask:linear-gradient(-60deg,#000 30%,#0005,#000 70%) right/300% 100%;
   background-repeat: no-repeat;
