@@ -46,7 +46,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: ghcr.io/alaxay8/frontend:v7
+          image: ghcr.io/alaxay8/frontend:v1.0.1
           imagePullPolicy: Always
           ports:
           - containerPort: 8080
