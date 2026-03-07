@@ -56,6 +56,12 @@ var (
 
 var validEnvs = []string{"local", "gcp", "azure", "aws", "onprem", "alibaba"}
 
+const (
+	themeAuto  = "auto"
+	themeLight = "light"
+	themeDark  = "dark"
+)
+
 func (fe *frontendServer) homeHandler(w http.ResponseWriter, r *http.Request) {
 	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
 	log.WithField("currency", currentCurrency(r)).Info("home")
@@ -232,7 +238,7 @@ func (fe *frontendServer) addToCartHandler(w http.ResponseWriter, r *http.Reques
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to add to cart"), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("location", baseUrl + "/cart")
+	w.Header().Set("location", baseUrl+"/cart")
 	w.WriteHeader(http.StatusFound)
 }
 
@@ -244,7 +250,7 @@ func (fe *frontendServer) emptyCartHandler(w http.ResponseWriter, r *http.Reques
 		renderHTTPError(log, r, w, errors.Wrap(err, "failed to empty cart"), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("location", baseUrl + "/")
+	w.Header().Set("location", baseUrl+"/")
 	w.WriteHeader(http.StatusFound)
 }
 
@@ -423,7 +429,7 @@ func (fe *frontendServer) logoutHandler(w http.ResponseWriter, r *http.Request) 
 		c.MaxAge = -1
 		http.SetCookie(w, c)
 	}
-	w.Header().Set("Location", baseUrl + "/")
+	w.Header().Set("Location", baseUrl+"/")
 	w.WriteHeader(http.StatusFound)
 }
 
@@ -522,6 +528,30 @@ func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusFound)
 }
 
+func (fe *frontendServer) setThemeHandler(w http.ResponseWriter, r *http.Request) {
+	log := r.Context().Value(ctxKeyLog{}).(logrus.FieldLogger)
+	payload := validator.SetThemePayload{Theme: strings.ToLower(strings.TrimSpace(r.FormValue("theme")))}
+	if err := payload.Validate(); err != nil {
+		renderHTTPError(log, r, w, validator.ValidationErrorResponse(err), http.StatusUnprocessableEntity)
+		return
+	}
+	log.WithField("theme.new", payload.Theme).WithField("theme.old", currentTheme(r)).
+		Debug("setting theme")
+
+	http.SetCookie(w, &http.Cookie{
+		Name:   cookieTheme,
+		Value:  payload.Theme,
+		MaxAge: cookieMaxAge,
+	})
+
+	referer := r.Header.Get("referer")
+	if referer == "" {
+		referer = baseUrl + "/"
+	}
+	w.Header().Set("Location", referer)
+	w.WriteHeader(http.StatusFound)
+}
+
 // chooseAd queries for advertisements available and randomly chooses one, if
 // available. It ignores the error retrieving the ad since it is not critical.
 func (fe *frontendServer) chooseAd(ctx context.Context, ctxKeys []string, log logrus.FieldLogger) *pb.Ad {
@@ -553,6 +583,7 @@ func injectCommonTemplateData(r *http.Request, payload map[string]interface{}) m
 		"session_id":        sessionID(r),
 		"request_id":        r.Context().Value(ctxKeyRequestID{}),
 		"user_currency":     currentCurrency(r),
+		"theme":             currentTheme(r),
 		"platform_css":      plat.css,
 		"platform_name":     plat.provider,
 		"is_cymbal_brand":   isCymbalBrand,
@@ -576,6 +607,24 @@ func currentCurrency(r *http.Request) string {
 		return c.Value
 	}
 	return defaultCurrency
+}
+
+func normalizeTheme(theme string) string {
+	normalized := strings.ToLower(strings.TrimSpace(theme))
+	switch normalized {
+	case themeAuto, themeLight, themeDark:
+		return normalized
+	default:
+		return defaultTheme
+	}
+}
+
+func currentTheme(r *http.Request) string {
+	c, _ := r.Cookie(cookieTheme)
+	if c != nil {
+		return normalizeTheme(c.Value)
+	}
+	return defaultTheme
 }
 
 func sessionID(r *http.Request) string {

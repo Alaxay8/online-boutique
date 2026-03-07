@@ -15,7 +15,7 @@
  */
 
 .order {
-    background: #F9F9F9;
+    background: var(--page-bg);
 }
 
 .order-complete-section {
@@ -40,7 +40,7 @@
 }
 
 .order-complete-section .border-bottom-solid {
-    border-bottom: 1px solid rgba(154, 160, 166, 0.5);
+    border-bottom: 1px solid var(--border-soft);
 }
 
 .order-complete-section .cymbal-button-primary {
@@ -49,5 +49,5 @@
 
 .order-complete-section a.cymbal-button-primary:hover {
     text-decoration: none;
-    color: white;
+    color: var(--text-inverse);
 }

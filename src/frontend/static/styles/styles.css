@@ -14,6 +14,75 @@
  * limitations under the License.
  */
 
+:root {
+  --blue: #2a74ff;
+  --page-bg: #F9F9F9;
+  --surface-bg: #ffffff;
+  --surface-soft: #f2f2f2;
+  --text-primary: #111111;
+  --text-secondary: #5C6063;
+  --text-tertiary: #605f64;
+  --text-inverse: #ffffff;
+  --subtle-text: #b4b2bb;
+  --header-top-bg: #853B5C;
+  --header-sub-bg: #ffffff;
+  --footer-bg: #570D2E;
+  --ad-bg: #FF9A9B;
+  --ad-link: #111111;
+  --border-strong: #acacac;
+  --border-soft: rgba(154, 160, 166, 0.5);
+  --field-border: #9AA0A6;
+  --header-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  --theme-chip-bg: #f4eef1;
+  --theme-chip-border: #d7c2cb;
+}
+
+body[data-theme='dark'] {
+  --page-bg: #11161d;
+  --surface-bg: #1a212b;
+  --surface-soft: #202936;
+  --text-primary: #e7edf4;
+  --text-secondary: #a7b2c0;
+  --text-tertiary: #a7b2c0;
+  --text-inverse: #f7f9fc;
+  --subtle-text: #d4dce6;
+  --header-top-bg: #4a1c35;
+  --header-sub-bg: #161d27;
+  --footer-bg: #2a1a29;
+  --ad-bg: #5c2a3a;
+  --ad-link: #ffe2e8;
+  --border-strong: #465669;
+  --border-soft: rgba(120, 134, 151, 0.45);
+  --field-border: #53657b;
+  --header-shadow: 0px 0px 8px rgba(0, 0, 0, 0.5);
+  --theme-chip-bg: #25303e;
+  --theme-chip-border: #3c4d62;
+}
+
+@media (prefers-color-scheme: dark) {
+  body[data-theme='auto'] {
+    --page-bg: #11161d;
+    --surface-bg: #1a212b;
+    --surface-soft: #202936;
+    --text-primary: #e7edf4;
+    --text-secondary: #a7b2c0;
+    --text-tertiary: #a7b2c0;
+    --text-inverse: #f7f9fc;
+    --subtle-text: #d4dce6;
+    --header-top-bg: #4a1c35;
+    --header-sub-bg: #161d27;
+    --footer-bg: #2a1a29;
+    --ad-bg: #5c2a3a;
+    --ad-link: #ffe2e8;
+    --border-strong: #465669;
+    --border-soft: rgba(120, 134, 151, 0.45);
+    --field-border: #53657b;
+    --header-shadow: 0px 0px 8px rgba(0, 0, 0, 0.5);
+    --theme-chip-bg: #25303e;
+    --theme-chip-border: #3c4d62;
+  }
+}
+
 /* General */
 
 html, body {
@@ -21,7 +90,8 @@ html, body {
 }
 
 body {
-  color: #111111;
+  color: var(--text-primary);
+  background-color: var(--page-bg);
   font-family: 'DM Sans', sans-serif;
   display: flex;
   flex-direction: column;
@@ -30,8 +100,8 @@ body {
 /* Header */
 
 header {
-  background-color: #853B5C;
-  color: white;
+  background-color: var(--header-top-bg);
+  color: var(--text-inverse);
 }
 
 /*
@@ -67,8 +137,8 @@ header .cart-size-circle {
   height: 16px;
   font-size: 11px;
   border-radius: 4px 4px 0 4px;
-  color: white;
-  background-color: #853B5C;
+  color: var(--text-inverse);
+  background-color: var(--header-top-bg);
 }
 
 header .navbar {
@@ -91,7 +161,7 @@ header .h-control {
   font-size: 12px;
   position: relative;
   margin-left: 40px;
-  color: #605f64;
+  color: var(--text-tertiary);
 }
 
 header .h-control:first-child {
@@ -104,7 +174,7 @@ header .h-control input {
   width: 250px;
   height: 24px;
   flex-shrink: 0;
-  background-color: #f2f2f2;
+  background-color: var(--surface-soft);
   display: flex;
   align-items: center;
 }
@@ -148,7 +218,9 @@ header .h-control select {
   align-items: center;
   background: transparent;
   border-radius: 0;
-  border: 1px solid #acacac;
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  background: transparent;
   width: 130px;
   height: 40px;
   flex-shrink: 0;
@@ -164,38 +236,59 @@ header .icon.arrow {
   height: 5px;
 }
 
+header .h-control.h-theme-control {
+  margin-left: 16px;
+}
+
+header .h-control.h-theme-control .theme-icon {
+  position: relative;
+  left: 33px;
+  font-size: 20px;
+}
+
+header .h-control.h-theme-control select {
+  width: 120px;
+  padding-left: 42px;
+  background-color: var(--theme-chip-bg);
+  border-color: var(--theme-chip-border);
+}
+
+header .h-control.h-theme-control .icon.arrow {
+  right: 14px;
+}
+
 header .h-control::-webkit-input-placeholder {
   /* Chrome/Opera/Safari */
   font-size: 12px;
-  color: #605f64;
+  color: var(--text-tertiary);
 }
 
 header .h-control::-moz-placeholder {
   /* Firefox 19+ */
   font-size: 12px;
-  color: #605f64;
+  color: var(--text-tertiary);
 }
 
 header .h-control :-ms-input-placeholder {
   /* IE 10+ */
   font-size: 12px;
-  color: #605f64;
+  color: var(--text-tertiary);
 }
 
 header .h-control :-moz-placeholder {
   /* Firefox 18- */
   font-size: 12px;
-  color: #605f64;
+  color: var(--text-tertiary);
 }
 
 header .navbar.sub-navbar {
   height: 60px;
-  background-color: white;
+  background-color: var(--header-sub-bg);
   font-size: 15px;
-  color: #b4b2bb;
+  color: var(--subtle-text);
   padding-top: 0;
   padding-bottom: 0;
-  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--header-shadow);
   z-index: 1; /* Need this to see the box-shadow on the home page. */
 }
 
@@ -217,7 +310,7 @@ header .navbar.sub-navbar .navbar-brand {
 }
 
 header .navbar.sub-navbar a {
-  color: #b4b2bb;
+  color: var(--subtle-text);
 }
 
 header .navbar.sub-navbar nav a {
@@ -235,6 +328,22 @@ header .navbar.sub-navbar .controls a img {
   margin-bottom: 3px;
 }
 
+body[data-theme='dark'] header .top-left-logo,
+body[data-theme='dark'] header .top-left-logo-cymbal,
+body[data-theme='dark'] header .cart-link .logo,
+body[data-theme='dark'] header .icon.arrow {
+  filter: brightness(0) saturate(100%) invert(92%) sepia(7%) saturate(359%) hue-rotate(178deg) brightness(102%) contrast(94%);
+}
+
+@media (prefers-color-scheme: dark) {
+  body[data-theme='auto'] header .top-left-logo,
+  body[data-theme='auto'] header .top-left-logo-cymbal,
+  body[data-theme='auto'] header .cart-link .logo,
+  body[data-theme='auto'] header .icon.arrow {
+    filter: brightness(0) saturate(100%) invert(92%) sepia(7%) saturate(359%) hue-rotate(178deg) brightness(102%) contrast(94%);
+  }
+}
+
 /* Footer */
 
 footer.py-5 {
@@ -244,12 +353,12 @@ footer.py-5 {
 
 footer .footer-top {
   padding: 60px 0px;
-  background-color: #570D2E;
-  color: white;
+  background-color: var(--footer-bg);
+  color: var(--text-inverse);
 }
 
 footer .footer-top a {
-  color: white;
+  color: var(--text-inverse);
   text-decoration: underline;
 }
 
@@ -283,7 +392,7 @@ footer .footer-top .footer-social div {
 
 main {
   flex: 1 0 auto;
-  background-color: #F9F9F9;
+  background-color: var(--page-bg);
 }
 
 @media (min-width: 992px) {
@@ -375,7 +484,7 @@ similar to that of the hot-products-row.
 .home-desktop-footer-row {
   padding-left: 9%;
   padding-right: 9%;
-  background-color: #570D2E;
+  background-color: var(--footer-bg);
   width: 100%;
   margin: 0;
 }
@@ -384,7 +493,7 @@ similar to that of the hot-products-row.
 
 .ad {
   position: relative;
-  background-color: #FF9A9B;
+  background-color: var(--ad-bg);
   font-size: 24px;
   text-align: center;
 }
@@ -399,7 +508,7 @@ similar to that of the hot-products-row.
 }
 
 .ad a {
-  color: black;
+  color: var(--ad-link);
 }
 
 /* Product */
@@ -408,7 +517,7 @@ similar to that of the hot-products-row.
   margin-top: 56px;
   margin-bottom: 112px;
   max-width: 1200px;
-  background-color: #F9F9F9;
+  background-color: var(--page-bg);
 }
 
 .h-product > .row {
@@ -434,7 +543,7 @@ similar to that of the hot-products-row.
   font-size: 56px;
   line-height: 1.14;
   font-weight: normal;
-  color: #111111;
+  color: var(--text-primary);
 }
 
 .h-product .product-packaging {
@@ -456,7 +565,7 @@ similar to that of the hot-products-row.
   line-height: 1.89;
   letter-spacing: 3.6px;
   text-align: center;
-  color: #111111;
+  color: var(--text-primary);
   border-radius: 0;
 }
 
@@ -468,7 +577,9 @@ similar to that of the hot-products-row.
 .product-quantity-dropdown select {
   width: 100%;
   height: 45px;
-  border: 1px solid #acacac;
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  background-color: var(--surface-bg);
   padding: 10px 16px;
   border-radius: 8px;
 }
@@ -548,7 +659,7 @@ similar to that of the hot-products-row.
 /* Recommendation */
 
 .recommendations {
-  background: #F9F9F9;
+  background: var(--page-bg);
   padding-bottom: 55px;
 }
 
@@ -653,8 +764,8 @@ the rules below could be extracted.
   line-height: 1.8em; /* Without this, there might be a 1px gap underneath. */
   font-weight: normal;
   border-radius: 4px 4px 0px 0px;
-  color: #5C6063;
-  background-color: white;
+  color: var(--text-secondary);
+  background-color: var(--surface-bg);
 }
 
 .cymbal-form-field input[type='email'],
@@ -663,10 +774,11 @@ the rules below could be extracted.
 .cymbal-form-field input[type='text'] {
   width: 100%;
   border: none;
-  border-bottom: 1px solid #9AA0A6;
+  border-bottom: 1px solid var(--field-border);
   padding: 0 16px 8px 16px;
   outline: none;
-  color: #1E2021;
+  color: var(--text-primary);
+  background-color: var(--surface-bg);
 }
 
 .cymbal-form-field .cymbal-dropdown-chevron {
