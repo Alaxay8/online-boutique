@@ -84,9 +84,6 @@
 
                     <div class="h-controls">
                         <div class="h-control h-theme-control">
-                            <span class="material-symbols-outlined icon theme-icon">
-                                {{ if eq $.theme "dark" }}dark_mode{{ else if eq $.theme "light" }}light_mode{{ else }}contrast{{ end }}
-                            </span>
                             <form method="POST" class="controls-form" action="{{ $.baseUrl }}/setTheme" id="theme_form">
                                 <select name="theme" aria-label="Select theme" onchange="document.getElementById('theme_form').submit();">
                                     <option value="auto" {{if eq $.theme "auto"}}selected="selected"{{end}}>Auto</option>
