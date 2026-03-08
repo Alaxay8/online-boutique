@@ -240,15 +240,9 @@ header .h-control.h-theme-control {
   margin-left: 16px;
 }
 
-header .h-control.h-theme-control .theme-icon {
-  position: relative;
-  left: 33px;
-  font-size: 20px;
-}
-
 header .h-control.h-theme-control select {
-  width: 120px;
-  padding-left: 42px;
+  width: 132px;
+  padding: 1px 28px 0 14px;
   background-color: var(--theme-chip-bg);
   border-color: var(--theme-chip-border);
 }
