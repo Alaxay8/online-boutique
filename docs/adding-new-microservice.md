@@ -21,7 +21,7 @@ Take a look at existing microservices for inspiration.
 
 Create a `Dockerfile` in your microservice's directory. This file will define the steps to build a container image for your service.
 
-Refer to this example and tweak based on your new service's needs: https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/src/frontend/Dockerfile
+Refer to this example and tweak based on your new service's needs: [/src/frontend/Dockerfile](/src/frontend/Dockerfile)
 
 ## 4. Create Kubernetes manifests
 
@@ -32,25 +32,25 @@ Create a new directory under `kustomize/components/` in the root of the reposito
 
 Ensure you follow the existing naming conventions and that the container image specified in the Deployment matches the one built by your `cloudbuild.yaml` and `skaffold.yaml` files.
 
-Refer to this example and tweak based on your new service's needs: https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/kustomize/components/shopping-assistant
+Refer to this example and tweak based on your new service's needs: [/kustomize/components/shopping-assistant](/kustomize/components/shopping-assistant)
 
 ## 5. Update the root `kustomization.yaml` file
 
 Add your newly created component to the root kustomization file so it gets picked up by the deployment cycle.
 
-The file is available here: https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/kustomize/kustomization.yaml
+The file is available here: [/kustomize/kustomization.yaml](/kustomize/kustomization.yaml)
 
 ## 6. Update the root `skaffold.yaml`
 
 Add your newly created service to the root skaffold file so the images build correctly.
 
-The file is available here: https://github.com/GoogleCloudPlatform/microservices-demo/blob/main/skaffold.yaml
+The file is available here: [/skaffold.yaml](/skaffold.yaml)
 
 ## 7. Update the Helm chart
 
 Add your newly created service to the Helm chart templates and default values.
 
-The chart is available here: https://github.com/GoogleCloudPlatform/microservices-demo/tree/main/helm-chart
+The chart is available here: [/helm-chart](/helm-chart)
 
 ## 8. Update the documentation
 
