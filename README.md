@@ -3,6 +3,15 @@
 </p> -->
 ![Continuous Integration](https://github.com/GoogleCloudPlatform/microservices-demo/workflows/Continuous%20Integration%20-%20Main/Release/badge.svg)
 
+> [!NOTE]
+> **Educational Fork & DevOps Sandbox**  
+> This repository is a learning-focused fork of the original [GoogleCloudPlatform/microservices-demo](https://github.com/GoogleCloudPlatform/microservices-demo).  
+> It was created to study and practice modern Kubernetes and DevOps patterns, including:
+> - **Event-driven messaging:** Integrated Apache Kafka (KRaft mode), Confluent Schema Registry, and Kafka REST Proxy.
+> - **Microservice enhancements:** Extended `checkoutservice` (Go) to publish order events to Kafka; added dark/light UI themes and currency support to `frontend` (Go).
+> - **Container registry & CI/CD workflows:** Configured deployment with GitHub Container Registry (`ghcr.io/alaxay8/*`) and Kubernetes `imagePullSecrets`.
+> - **Kubernetes management:** Advanced orchestration using Kustomize and dedicated namespaces.
+
 **Online Boutique** is a cloud-first microservices demo application. The application is a web-based e-commerce app where users can browse items, add them to the cart, and purchase them.
 
 This application demonstrates modern microservice architecture patterns using Kubernetes, gRPC, and asynchronous event-driven messaging with Apache Kafka. It works on any Kubernetes cluster (GKE, Minikube, Kind, etc.).
