@@ -15,7 +15,6 @@
 name: "Clean up deployment"
 on:
   pull_request:
-    # run on pull requests targeting main
     branches:
       - main
     types: closed
@@ -26,19 +25,9 @@ on:
       - 'terraform/**'
       - '.github/workflows/terraform-validate-ci.yaml'
 jobs:
+  # Disabled: was used for deleting PR namespaces on Google internal staging cluster
   cleanup-namespace:
-    runs-on: [self-hosted, is-enabled]
+    if: false
+    runs-on: ubuntu-latest
     steps:
-      - name: Delete PR namespace in staging cluster
-        if: ${{ always() }}
-        timeout-minutes: 20
-        run: |
-          gcloud container clusters get-credentials $PR_CLUSTER \
-              --region $REGION --project $PROJECT_ID
-          NAMESPACE="pr${PR_NUMBER}"
-          kubectl delete namespace $NAMESPACE
-        env:
-          PROJECT_ID: "online-boutique-ci"
-          PR_CLUSTER: "prs-gke-cluster"
-          REGION: "us-central1"
-          PR_NUMBER: ${{ github.event.number }}
+      - run: echo "Cleanup of Google staging cluster disabled in fork"
