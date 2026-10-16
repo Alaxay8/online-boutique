@@ -137,12 +137,61 @@ jobs:
             echo "dockerfile=src/$SERVICE/Dockerfile" >> $GITHUB_OUTPUT
           fi
 
+      - name: Compute next semantic version
+        id: semver
+        env:
+          SERVICE: ${{ matrix.service }}
+          OWNER: ${{ steps.repo-owner.outputs.owner }}
+          GH_TOKEN: ${{ secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - << 'EOF'
+          import subprocess, re, sys, os
+
+          service = os.environ.get('SERVICE')
+          owner = os.environ.get('OWNER')
+
+          tags = []
+          try:
+              cmd = ['gh', 'api', f'/users/{owner}/packages/container/{service}/versions', '--jq', '.[].metadata.container.tags[]']
+              res = subprocess.run(cmd, capture_output=True, text=True, check=True)
+              tags = [t.strip() for t in res.stdout.splitlines() if t.strip()]
+          except Exception as e:
+              print(f"Notice: Could not fetch existing tags: {e}", file=sys.stderr)
+
+          semvers = []
+          for t in tags:
+              m = re.match(r'^v?(\d+)\.(\d+)\.(\d+)$', t)
+              if m:
+                  semvers.append((int(m.group(1)), int(m.group(2)), int(m.group(3))))
+
+          if semvers:
+              semvers.sort()
+              major, minor, patch = semvers[-1]
+              next_ver = f"v{major}.{minor}.{patch + 1}"
+          else:
+              singles = []
+              for t in tags:
+                  m = re.match(r'^v?(\d+)$', t)
+                  if m:
+                      singles.append(int(m.group(1)))
+              if singles:
+                  singles.sort()
+                  next_ver = f"v{singles[-1]}.0.1"
+              else:
+                  next_ver = "v1.0.1"
+
+          print(f"Calculated next version for {service}: {next_ver}", file=sys.stderr)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f"version={next_ver}\n")
+          EOF
+
       - name: Extract Docker metadata (tags, labels)
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ steps.repo-owner.outputs.owner }}/${{ matrix.service }}
           tags: |
+            type=raw,value=${{ steps.semver.outputs.version }}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=raw,value=dev,enable=${{ github.ref == 'refs/heads/dev' }}
             type=sha,prefix=sha-,format=short
