@@ -1,0 +1,210 @@
+name: Build and Push Images
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'src/**'
+  workflow_dispatch:
+    inputs:
+      service:
+        description: 'Microservice to build (or "all")'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - adservice
+          - cartservice
+          - checkoutservice
+          - currencyservice
+          - emailservice
+          - frontend
+          - loadgenerator
+          - paymentservice
+          - productcatalogservice
+          - recommendationservice
+          - shippingservice
+          - shoppingassistantservice
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  filter:
+    name: Detect Changed Services
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.set-matrix.outputs.services }}
+      has_changes: ${{ steps.set-matrix.outputs.has_changes }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Filter changed service directories
+        id: filter
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.service == 'all'
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            adservice:
+              - 'src/adservice/**'
+            cartservice:
+              - 'src/cartservice/**'
+            checkoutservice:
+              - 'src/checkoutservice/**'
+            currencyservice:
+              - 'src/currencyservice/**'
+            emailservice:
+              - 'src/emailservice/**'
+            frontend:
+              - 'src/frontend/**'
+            loadgenerator:
+              - 'src/loadgenerator/**'
+            paymentservice:
+              - 'src/paymentservice/**'
+            productcatalogservice:
+              - 'src/productcatalogservice/**'
+            recommendationservice:
+              - 'src/recommendationservice/**'
+            shippingservice:
+              - 'src/shippingservice/**'
+            shoppingassistantservice:
+              - 'src/shoppingassistantservice/**'
+
+      - name: Determine target services
+        id: set-matrix
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.service }}" != "all" ]; then
+            SERVICES_JSON='["${{ github.event.inputs.service }}"]'
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.service }}" = "all" ]; then
+            SERVICES_JSON='["adservice","cartservice","checkoutservice","currencyservice","emailservice","frontend","loadgenerator","paymentservice","productcatalogservice","recommendationservice","shippingservice","shoppingassistantservice"]'
+          else
+            SERVICES_JSON='${{ steps.filter.outputs.changes }}'
+          fi
+
+          echo "Selected services for build: $SERVICES_JSON"
+
+          if [ -z "$SERVICES_JSON" ] || [ "$SERVICES_JSON" = "[]" ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "services=[]" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "services=$SERVICES_JSON" >> $GITHUB_OUTPUT
+          fi
+
+  build:
+    name: Build & Push
+    needs: filter
+    if: needs.filter.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(needs.filter.outputs.services) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Normalize repository owner to lowercase
+        id: repo-owner
+        run: |
+          LOWERCASE_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "owner=${LOWERCASE_OWNER}" >> $GITHUB_OUTPUT
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Determine build context and Dockerfile
+        id: config
+        run: |
+          SERVICE="${{ matrix.service }}"
+          if [ "$SERVICE" = "cartservice" ]; then
+            echo "context=src/cartservice/src" >> $GITHUB_OUTPUT
+            echo "dockerfile=src/cartservice/src/Dockerfile" >> $GITHUB_OUTPUT
+          else
+            echo "context=src/$SERVICE" >> $GITHUB_OUTPUT
+            echo "dockerfile=src/$SERVICE/Dockerfile" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Compute next semantic version
+        id: semver
+        env:
+          SERVICE: ${{ matrix.service }}
+          OWNER: ${{ steps.repo-owner.outputs.owner }}
+          GH_TOKEN: ${{ secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - << 'EOF'
+          import subprocess, re, sys, os
+
+          service = os.environ.get('SERVICE')
+          owner = os.environ.get('OWNER')
+
+          tags = []
+          try:
+              cmd = ['gh', 'api', f'/users/{owner}/packages/container/{service}/versions', '--jq', '.[].metadata.container.tags[]']
+              res = subprocess.run(cmd, capture_output=True, text=True, check=True)
+              tags = [t.strip() for t in res.stdout.splitlines() if t.strip()]
+          except Exception as e:
+              print(f"Notice: Could not fetch existing tags: {e}", file=sys.stderr)
+
+          semvers = []
+          for t in tags:
+              m = re.match(r'^v?(\d+)\.(\d+)\.(\d+)$', t)
+              if m:
+                  semvers.append((int(m.group(1)), int(m.group(2)), int(m.group(3))))
+
+          if semvers:
+              semvers.sort()
+              major, minor, patch = semvers[-1]
+              next_ver = f"v{major}.{minor}.{patch + 1}"
+          else:
+              singles = []
+              for t in tags:
+                  m = re.match(r'^v?(\d+)$', t)
+                  if m:
+                      singles.append(int(m.group(1)))
+              if singles:
+                  singles.sort()
+                  next_ver = f"v{singles[-1]}.0.1"
+              else:
+                  next_ver = "v1.0.1"
+
+          print(f"Calculated next version for {service}: {next_ver}", file=sys.stderr)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f"version={next_ver}\n")
+          EOF
+
+      - name: Extract Docker metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ steps.repo-owner.outputs.owner }}/${{ matrix.service }}
+          tags: |
+            type=raw,value=${{ steps.semver.outputs.version }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=dev,enable=${{ github.ref == 'refs/heads/dev' }}
+            type=sha,prefix=sha-,format=short
+            type=ref,event=tag
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ steps.config.outputs.context }}
+          file: ${{ steps.config.outputs.dockerfile }}
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
