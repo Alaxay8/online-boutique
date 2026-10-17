@@ -183,3 +183,41 @@ func TestSetCurrencyFailsValidation(t *testing.T) {
 		})
 	}
 }
+
+func TestSetThemePassesValidation(t *testing.T) {
+	tests := []struct {
+		name  string
+		theme string
+	}{
+		{"auto", "auto"},
+		{"light", "light"},
+		{"dark", "dark"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			payload := SetThemePayload{Theme: tt.theme}
+			if err := payload.Validate(); err != nil {
+				t.Errorf("want validation on %v, got %v", payload, err)
+			}
+		})
+	}
+}
+
+func TestSetThemeFailsValidation(t *testing.T) {
+	tests := []struct {
+		name  string
+		theme string
+	}{
+		{"invalid value", "night"},
+		{"upper case", "DARK"},
+		{"empty", ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			payload := SetThemePayload{Theme: tt.theme}
+			if err := payload.Validate(); err == nil {
+				t.Errorf("want validation on %v, got %v", payload, err)
+			}
+		})
+	}
+}

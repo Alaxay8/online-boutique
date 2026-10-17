@@ -17,7 +17,7 @@
 .cart-sections {
     padding-bottom: 120px;
     padding-top: 56px;
-    background-color: #F9F9F9;
+    background-color: var(--page-bg);
 }
 
 .cart-sections h3 {
@@ -27,7 +27,7 @@
 
 .cart-sections a.cymbal-button-primary:hover {
     text-decoration: none;
-    color: white;
+    color: var(--text-inverse);
 }
 
 /* Empty Cart Section */
@@ -44,7 +44,7 @@
 }
 
 .empty-cart-section a:hover {
-    color: white;
+    color: var(--text-inverse);
     text-decoration: none;
 }
 
@@ -59,7 +59,7 @@
 .cart-summary-total-row {
     padding-bottom: 24px;
     padding-top: 24px;
-    border-top: solid 1px rgba(154, 160, 166, 0.5);
+    border-top: solid 1px var(--border-soft);
 }
 
 .cart-summary-item-row img {
@@ -68,7 +68,7 @@
 
 .cart-summary-item-row-item-id-row {
     font-size: 12px;
-    color: #5C6063;
+    color: var(--text-secondary);
 }
 
 .cart-summary-item-row h4 {
