@@ -15,9 +15,12 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"time"
 
@@ -81,6 +84,10 @@ type checkoutService struct {
 
 	paymentSvcAddr string
 	paymentSvcConn *grpc.ClientConn
+
+	ordersTopic  string
+	kafkaRestURL string
+	httpClient   *http.Client
 }
 
 func main() {
@@ -112,6 +119,10 @@ func main() {
 	mustMapEnv(&svc.currencySvcAddr, "CURRENCY_SERVICE_ADDR")
 	mustMapEnv(&svc.emailSvcAddr, "EMAIL_SERVICE_ADDR")
 	mustMapEnv(&svc.paymentSvcAddr, "PAYMENT_SERVICE_ADDR")
+
+	svc.ordersTopic = getEnvWithDefault("KAFKA_ORDERS_TOPIC", "")
+	svc.kafkaRestURL = getEnvWithDefault("KAFKA_REST_URL", "")
+	svc.httpClient = &http.Client{Timeout: 3 * time.Second}
 
 	mustConnGRPC(ctx, &svc.shippingSvcConn, svc.shippingSvcAddr)
 	mustConnGRPC(ctx, &svc.productCatalogSvcConn, svc.productCatalogSvcAddr)
@@ -205,6 +216,14 @@ func mustMapEnv(target *string, envKey string) {
 	*target = v
 }
 
+func getEnvWithDefault(envKey, defaultValue string) string {
+	v := os.Getenv(envKey)
+	if v == "" {
+		return defaultValue
+	}
+	return v
+}
+
 func mustConnGRPC(ctx context.Context, conn **grpc.ClientConn, addr string) {
 	var err error
 	ctx, cancel := context.WithTimeout(ctx, time.Second*3)
@@ -268,6 +287,7 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 		ShippingAddress:    req.Address,
 		Items:              prep.orderItems,
 	}
+	cs.publishOrderPlaced(ctx, orderResult, req.UserId, &total)
 
 	if err := cs.sendOrderConfirmation(ctx, req.Email, orderResult); err != nil {
 		log.Warnf("failed to send order confirmation to %q: %+v", req.Email, err)
@@ -356,7 +376,7 @@ func (cs *checkoutService) prepOrderItems(ctx context.Context, items []*pb.CartI
 }
 
 func (cs *checkoutService) convertCurrency(ctx context.Context, from *pb.Money, toCurrency string) (*pb.Money, error) {
-	result, err := pb.NewCurrencyServiceClient(cs.currencySvcConn).Convert(context.TODO(), &pb.CurrencyConversionRequest{
+	result, err := pb.NewCurrencyServiceClient(cs.currencySvcConn).Convert(ctx, &pb.CurrencyConversionRequest{
 		From:   from,
 		ToCode: toCurrency})
 	if err != nil {
@@ -390,4 +410,71 @@ func (cs *checkoutService) shipOrder(ctx context.Context, address *pb.Address, i
 		return "", fmt.Errorf("shipment failed: %+v", err)
 	}
 	return resp.GetTrackingId(), nil
+}
+
+type orderPlacedEvent struct {
+	OrderID            string          `json:"orderId"`
+	UserID             string          `json:"userId"`
+	UserCurrency       string          `json:"userCurrency"`
+	Total              *pb.Money       `json:"total"`
+	Items              []*pb.OrderItem `json:"items"`
+	ShippingTrackingID string          `json:"shippingTrackingId"`
+	ShippingAddress    *pb.Address     `json:"shippingAddress"`
+}
+
+func (cs *checkoutService) publishOrderPlaced(ctx context.Context, order *pb.OrderResult, userID string, total *pb.Money) {
+	if cs.kafkaRestURL == "" || cs.ordersTopic == "" {
+		log.Warn("kafka REST proxy not configured; skipping order event publish")
+		return
+	}
+
+	event := orderPlacedEvent{
+		OrderID:            order.GetOrderId(),
+		UserID:             userID,
+		UserCurrency:       total.GetCurrencyCode(),
+		Total:              total,
+		Items:              order.GetItems(),
+		ShippingTrackingID: order.GetShippingTrackingId(),
+		ShippingAddress:    order.GetShippingAddress(),
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	reqBody := map[string]interface{}{
+		"records": []map[string]interface{}{
+			{
+				"value": event,
+				"key":   order.GetOrderId(),
+			},
+		},
+	}
+
+	postBody, err := json.Marshal(reqBody)
+	if err != nil {
+		log.Warnf("failed to marshal request for kafka REST proxy: %v", err)
+		return
+	}
+
+	endpoint := fmt.Sprintf("%s/topics/%s", cs.kafkaRestURL, cs.ordersTopic)
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewBuffer(postBody))
+	if err != nil {
+		log.Warnf("failed to build kafka REST proxy request: %v", err)
+		return
+	}
+	request.Header.Set("Content-Type", "application/vnd.kafka.json.v2+json")
+
+	resp, err := cs.httpClient.Do(request)
+	if err != nil {
+		log.Warnf("failed to publish order event %q: %v", order.GetOrderId(), err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 300 {
+		log.Warnf("kafka REST proxy returned status %d for order %q", resp.StatusCode, order.GetOrderId())
+		return
+	}
+
+	log.Infof("published order event %q to kafka topic %q via REST", order.GetOrderId(), cs.ordersTopic)
 }
