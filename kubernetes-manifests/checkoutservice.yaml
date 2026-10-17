@@ -33,6 +33,8 @@ spec:
         runAsGroup: 1000
         runAsNonRoot: true
         runAsUser: 1000
+      imagePullSecrets:
+        - name: ghcr-cred
       containers:
         - name: server
           securityContext:
@@ -42,7 +44,8 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: checkoutservice
+          image: ghcr.io/alaxay8/checkoutservice:v3
+          imagePullPolicy: Always
           ports:
           - containerPort: 5050
           readinessProbe:
@@ -66,6 +69,10 @@ spec:
             value: "currencyservice:7000"
           - name: CART_SERVICE_ADDR
             value: "cartservice:7070"
+          - name: KAFKA_REST_URL
+            value: "http://kafka-rest:8082"
+          - name: KAFKA_ORDERS_TOPIC
+            value: "orders"
           resources:
             requests:
               cpu: 100m

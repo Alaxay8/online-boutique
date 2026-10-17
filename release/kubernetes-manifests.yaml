@@ -49,7 +49,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/emailservice:v0.10.3
+        image: ghcr.io/alaxay8/emailservice:latest
         ports:
         - containerPort: 8080
         env:
@@ -92,6 +92,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: emailservice
+imagePullSecrets:
+  - name: ghcr-cred
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -123,7 +125,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: us-central1-docker.pkg.dev/google-samples/microservices-demo/checkoutservice:v0.10.3
+          image: ghcr.io/alaxay8/checkoutservice:latest
           ports:
           - containerPort: 5050
           readinessProbe:
@@ -174,6 +176,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: checkoutservice
+imagePullSecrets:
+  - name: ghcr-cred
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -206,7 +210,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/recommendationservice:v0.10.3
+        image: ghcr.io/alaxay8/recommendationservice:latest
         ports:
         - containerPort: 8080
         readinessProbe:
@@ -251,6 +255,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: recommendationservice
+imagePullSecrets:
+  - name: ghcr-cred
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -284,7 +290,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: us-central1-docker.pkg.dev/google-samples/microservices-demo/frontend:v0.10.3
+          image: ghcr.io/alaxay8/frontend:latest
           ports:
           - containerPort: 8080
           readinessProbe:
@@ -379,6 +385,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: frontend
+imagePullSecrets:
+  - name: ghcr-cred
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -411,7 +419,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/paymentservice:v0.10.3
+        image: ghcr.io/alaxay8/paymentservice:latest
         ports:
         - containerPort: 50051
         env:
@@ -452,6 +460,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: paymentservice
+imagePullSecrets:
+  - name: ghcr-cred
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -484,7 +494,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/productcatalogservice:v0.10.3
+        image: ghcr.io/alaxay8/productcatalogservice:latest
         ports:
         - containerPort: 3550
         env:
@@ -525,6 +535,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: productcatalogservice
+imagePullSecrets:
+  - name: ghcr-cred
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -557,7 +569,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/cartservice:v0.10.3
+        image: ghcr.io/alaxay8/cartservice:latest
         ports:
         - containerPort: 7070
         env:
@@ -599,6 +611,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: cartservice
+imagePullSecrets:
+  - name: ghcr-cred
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -735,7 +749,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/loadgenerator:v0.10.3
+        image: ghcr.io/alaxay8/loadgenerator:latest
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
@@ -755,6 +769,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: loadgenerator
+imagePullSecrets:
+  - name: ghcr-cred
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -787,7 +803,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/currencyservice:v0.10.3
+        image: ghcr.io/alaxay8/currencyservice:latest
         ports:
         - name: grpc
           containerPort: 7000
@@ -829,6 +845,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: currencyservice
+imagePullSecrets:
+  - name: ghcr-cred
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -860,7 +878,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/shippingservice:v0.10.3
+        image: ghcr.io/alaxay8/shippingservice:latest
         ports:
         - containerPort: 50051
         env:
@@ -902,6 +920,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: shippingservice
+imagePullSecrets:
+  - name: ghcr-cred
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -934,7 +954,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: us-central1-docker.pkg.dev/google-samples/microservices-demo/adservice:v0.10.3
+        image: ghcr.io/alaxay8/adservice:latest
         ports:
         - containerPort: 9555
         env:
@@ -977,4 +997,90 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: adservice
+imagePullSecrets:
+  - name: ghcr-cred
 # [END gke_release_kubernetes_manifests_microservices_demo]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+  labels:
+    app: kafka
+spec:
+  selector:
+    app: kafka
+  ports:
+    - name: kafka
+      port: 9092
+      targetPort: 9092
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka
+  labels:
+    app: kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      serviceAccountName: kafka
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: kafka
+          image: apache/kafka:3.7.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: kafka
+              containerPort: 9092
+          env:
+            - name: KAFKA_CFG_NODE_ID
+              value: "1"
+            - name: KAFKA_CFG_PROCESS_ROLES
+              value: "broker,controller"
+            - name: KAFKA_CFG_CONTROLLER_QUORUM_VOTERS
+              value: "1@localhost:9093"
+            - name: KAFKA_CFG_LISTENERS
+              value: "PLAINTEXT://:9092,CONTROLLER://:9093"
+            - name: KAFKA_CFG_ADVERTISED_LISTENERS
+              value: "PLAINTEXT://kafka:9092"
+            - name: KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP
+              value: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+            - name: KAFKA_CFG_CONTROLLER_LISTENER_NAMES
+              value: "CONTROLLER"
+            - name: ALLOW_PLAINTEXT_LISTENER
+              value: "yes"
+          readinessProbe:
+            tcpSocket:
+              port: 9092
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 9092
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kafka
